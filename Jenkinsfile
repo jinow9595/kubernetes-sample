@@ -1,6 +1,6 @@
 /* pipeline 변수 설정 */
-def DOCKER_IMAGE_NAME = "test/webflux-repo" // 생성하는 Docker image 이름
-def DOCKER_IMAGE_TAGS = "testtag"           // 생성하는 Docker image 태그
+def DOCKER_IMAGE_NAME = "webflux-repo" // 생성하는 Docker image 이름
+def DOCKER_IMAGE_TAG = "1.0.0"           // 생성하는 Docker image 태그
 def NAMESPACE = "kube-public"
 def VERSION = "${env.BUILD_NUMBER}"
 def DATE = new Date();
@@ -24,7 +24,6 @@ podTemplate(label: 'builder',
         }
         stage('Build') {
             container('maven') {
-                sh "echo Build > maven"
                 sh "mvn package"
             }
         }
@@ -35,10 +34,11 @@ podTemplate(label: 'builder',
                     usernameVariable: 'USERNAME',
                     passwordVariable: 'PASSWORD')]) {
                         // ./build/libs 생성된 jar파일을 도커파일을 활용하여 도커 빌드를 수행한다
-                        sh "echo Docker build > docker"
-                        sh "docker build -t ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAGS} ."
+                        sh "docker build -t ${USERNAME}/${DOCKER_IMAGE_NAME} ."
+                        sh "docker tag ${DOCKER_IMAGE_NAME} ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}"
+                        // login 후 바로 push하지 않을 경우 에러
                         sh "docker login -u ${USERNAME} -p ${PASSWORD}"
-                        sh "docker push ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAGS}"
+                        sh "docker push ${USERNAME}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}"
                 }
             }
         }
