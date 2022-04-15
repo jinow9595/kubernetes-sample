@@ -35,8 +35,7 @@ podTemplate(label: 'builder',
                     passwordVariable: 'PASSWORD')]) {
                         // ./build/libs 생성된 jar파일을 도커파일을 활용하여 도커 빌드를 수행한다
                         sh "docker build -t ${USERNAME}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} ."
-                        sh "docker tag ${DOCKER_IMAGE_NAME} ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}"
-                        sh "docker images"
+                        sh "docker images -a"
                         // login 후 바로 push하지 않을 경우 에러
                         sh "docker login -u ${USERNAME} -p ${PASSWORD}"
                         sh "docker push ${USERNAME}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}"
@@ -45,27 +44,28 @@ podTemplate(label: 'builder',
         }   
         stage('Run kubectl') {
             container('kubectl') {
-                sh "echo Run kubectl kubectl"
+                sh "echo Run kubectl"
                 sh "kubectl get pods"
 
                 withCredentials([usernamePassword(
-                    credentialsId: 'docker_hub',
+                    credentialsId: 'docker-hub',
                     usernameVariable: 'USERNAME',
                     passwordVariable: 'PASSWORD')]) {
+                        sh "echo 111111111111111111111111111111111111111111111111111111"
                         // namespace 존재여부 확인. 미존재시 namespace 생성
                         sh "kubectl get ns ${NAMESPACE}|| kubectl create ns ${NAMESPACE}"
-
+                        sh "echo 222222222222222222222222222222222222222222222222222222"
                         // secret 존재여부 확인. 미존재시 secret 생성
-                        sh "kubectl get secret my-secret -n ${NAMESPACE}"
-                        sh "kubectl create secret docker-registry my-secret \
+                        sh """kubectl get secret docker-secret -n ${NAMESPACE} || 
+                            kubectl create secret docker-registry docker-secret \
                             --docker-server=https://index.docker.io/v1/ \
                             --docker-username=${USERNAME} \
                             --docker-password=${PASSWORD} \
                             --docker-email=hgkwak@jasonsystem.co.kr \
-                            -n ${NAMESPACE}"
+                            -n ${NAMESPACE}"""
                         // deployment.yaml 의 env값을 수정해준다(DATE로). 배포시 수정을 해주지 않으면 변경된 내용이 정상 배포되지 않는다.
                         // sh "echo ${VERSION}"
-                        sh "sed -i.bak 's#VERSION_STRING#${VERSION}#' ./deployment.yaml"*/
+                        // sh "sed -i.bak 's#VERSION_STRING#${VERSION}#' ./deployment.yaml"
                         sh "echo ${DATE}"
                         sh "sed -i.bak 's#DATE_STRING#${DATE}#' ./deployment.yaml"
 
@@ -77,7 +77,7 @@ podTemplate(label: 'builder',
         }
         stage('Run helm') {
             container('helm') {
-                sh "echo Run helm helm"
+                sh "echo Run helm"
                 sh "helm list"
             }
         }
