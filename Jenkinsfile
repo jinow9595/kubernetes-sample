@@ -20,6 +20,7 @@ podTemplate(label: 'builder',
     node('builder') {
         stage('Checkout') {
             // gitlab으로부터 소스 다운
+            // builder pod 생성 후 stage 진행되고 작업 완료 시 pod가 소멸되기 때문에 주석처리 불가능
             checkout scm
         }
         stage('Build') {
@@ -34,18 +35,18 @@ podTemplate(label: 'builder',
                     usernameVariable: 'USERNAME',
                     passwordVariable: 'PASSWORD')]) {
                         // ./build/libs 생성된 jar파일을 도커파일을 활용하여 도커 빌드를 수행한다
-                        sh "docker build -t ${USERNAME}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} ."
-                        sh "docker images -a"
+                         sh "docker build -t ${USERNAME}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} ."
+                         sh "docker images -a"
                         // login 후 바로 push하지 않을 경우 에러
-                        sh "docker login -u ${USERNAME} -p ${PASSWORD}"
-                        sh "docker push ${USERNAME}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}"
+                         sh "docker login -u ${USERNAME} -p ${PASSWORD}"
+                         sh "docker push ${USERNAME}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}"
                 }
             }
         }   
         stage('Run kubectl') {
             container('kubectl') {
                 sh "echo Run kubectl"
-                sh "kubectl get pods"
+                sh "kubectl get po, deploy"
 
                 withCredentials([usernamePassword(
                     credentialsId: 'docker-hub',
