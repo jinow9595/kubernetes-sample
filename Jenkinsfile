@@ -51,10 +51,8 @@ podTemplate(label: 'builder',
                     credentialsId: 'docker-hub',
                     usernameVariable: 'USERNAME',
                     passwordVariable: 'PASSWORD')]) {
-                        sh "echo 111111111111111111111111111111111111111111111111111111"
                         // namespace 존재여부 확인. 미존재시 namespace 생성
                         sh "kubectl get ns ${NAMESPACE}|| kubectl create ns ${NAMESPACE}"
-                        sh "echo 222222222222222222222222222222222222222222222222222222"
                         // secret 존재여부 확인. 미존재시 secret 생성
                         sh """kubectl get secret docker-secret -n ${NAMESPACE} || 
                             kubectl create secret docker-registry docker-secret \
@@ -66,8 +64,7 @@ podTemplate(label: 'builder',
                         // deployment.yaml 의 env값을 수정해준다(DATE로). 배포시 수정을 해주지 않으면 변경된 내용이 정상 배포되지 않는다.
                         // sh "echo ${VERSION}"
                         // sh "sed -i.bak 's#VERSION_STRING#${VERSION}#' ./deployment.yaml"
-                        sh "echo ${DATE}"
-                        sh "sed -i.bak 's#DATE_STRING#${DATE}#' ./deployment.yaml"
+                        sh "sed -i.bak 's#DATE_STRING#${VERSION}#' ./deployment.yaml"
 
                         // yaml파일로 배포를 수행한다
                         sh "kubectl apply -f ./deployment.yaml -n ${NAMESPACE}"

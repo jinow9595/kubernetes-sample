@@ -6,7 +6,9 @@ spec:
   ports:
     - name: "8080"
       port: 8082
+      # port 매칭
       targetPort: 8080
   selector:
+    # app 이름 매칭
     app: batch-visualizer-auth
   type: NodePort

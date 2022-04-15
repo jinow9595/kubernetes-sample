@@ -10,12 +10,14 @@ spec:
   template:
     metadata:
       labels:
+        # app 이름 매칭
         app: batch-visualizer-auth
     spec:
       containers:
         - name: batch-visualizer-auth
           image: twofootdog/project-repo:batch-visualizer-auth
           ports:
+            # port 매칭
             - containerPort: 8080
           imagePullPolicy: Always
           env:
