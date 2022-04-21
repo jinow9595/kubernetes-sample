@@ -1,27 +1,71 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: batch-visualizer-auth-deployment
+  name: webflux-repo-test-deployment
+  namespace: ns-test
 spec:
-  replicas: 1
+  # replicas => 갯수만큼 pod 실행
+  replicas: 3
   selector:
     matchLabels:
-      app: batch-visualizer-auth
+      app: webflux-repo-test
   template:
     metadata:
       labels:
         # app 이름 매칭
-        app: batch-visualizer-auth
+        app: webflux-repo-test
     spec:
       containers:
-        - name: batch-visualizer-auth
-          image: twofootdog/project-repo:batch-visualizer-auth
+        - name: webflux-repo-test
+          image: hgkwak2json/webflux-repo:116
           ports:
+            - name: http
             # port 매칭
-            - containerPort: 8080
+              containerPort: 8081
           imagePullPolicy: Always
+          # 환경변수
           env:
             - name: DATE
               value: 'DATE_STRING'
       imagePullSecrets:
         - name: docker-secret
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webflux-repo-test-service
+  namespace: ns-test
+spec:
+  ports:
+    - name: "http"
+      port: 8080
+      protocol: TCP
+      # port 매칭
+      targetPort: 8081
+    - name: https
+      port: 443
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    # app 이름 매칭
+    app: webflux-repo-test
+  type: NodePort
+
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: test-ingress
+  namespace: ns-test
+  annotations:
+    ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: test.jasonsystem.co.kr
+    http:
+      paths:         
+      - path: /webflux
+        backend:
+          serviceName: webflux-repo-test-service
+          servicePort: 8080

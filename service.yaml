@@ -1,14 +1,15 @@
-apiVersion: v1
-kind: Service
-metadata:
-  name: batch-visualizer-auth-service
-spec:
-  ports:
-    - name: "8080"
-      port: 8082
-      # port 매칭
-      targetPort: 8080
-  selector:
-    # app 이름 매칭
-    app: batch-visualizer-auth
-  type: NodePort
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: webflux-repo-test-service
+# spec:
+#   ports:
+#     - name: "test-http"
+#       port: 8080
+#       protocol: TCP
+#       # port 매칭
+#       targetPort: 8080
+#   selector:
+#     # app 이름 매칭
+#     app: webflux-repo-test
+#   type: LoadBalancer
